@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+    database:
+        image: postgres
+        container_name: api-ng
+        restart: always
+        ports:
+            - 5433:5432
+        environment:
+            - POSTGRES_USER=api-ng
+            - POSTGRES_PASSWORD=123456
+            - POSTGRES_DB=api-ng
+        volumes:
+            - pgdata:/data/postgres
+
+volumes:
+    pgdata:
+        driver: local
