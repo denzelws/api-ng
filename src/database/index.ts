@@ -1,15 +1,21 @@
-import { DataSource } from "typeorm";
-
- export const AppDataSource = new DataSource({
-    "name": "default",
-    "type": "postgres",
-    "port": 5433,
-    "host": "localhost",
-    "username": "api-ng",
-    "password": "123456",
-    "database": "api-ng",
-    "entities": ["./src/entities/*.ts"],
-    "migrations": ["./src/database/migrations/*.ts"],
-})
-
-
+async function connect() {
+    if (global.connection)
+        return global.connection.connect();
+ 
+    const { Pool } = require('pg');
+    const pool = new Pool({
+        connectionString: 'postgres://api-ng:123456@localhost:5433/api-ng'
+    });
+ 
+    //apenas testando a conexão
+    const client = await pool.connect();
+    console.log("Criou pool de conexões no PostgreSQL!");
+ 
+    const res = await client.query('SELECT NOW()');
+    console.log(res.rows[0]);
+    client.release();
+ 
+    //guardando para usar sempre o mesmo
+    global.connection = pool;
+    return pool.connect();
+}
