@@ -1,5 +1,5 @@
 const createUsers = `
-CREATE TABLE users.usuarios (
+CREATE TABLE IF NOT EXISTS users.usuarios (
 	id uuid NOT NULL,
 	"name" varchar NOT NULL,
 	"password" varchar NOT NULL,

@@ -1,5 +1,5 @@
 const createTransactions = `
-CREATE TABLE users.transactions (
+CREATE TABLE IF NOT EXISTS users.transactions (
 	id uuid NOT NULL,
 	debited_account_id uuid NOT NULL,
 	credited_account_id uuid NOT NULL,
