@@ -1,6 +1,10 @@
+export {}
+
 const { v4 } = require('uuid')
 
-const bd = require('../database')
+const database = require('../database')
+
+export {}
 
 let contacts = [
     {
@@ -20,21 +24,27 @@ let contacts = [
 ]
 
 class ContactsRepository {
-    findAll() {
-        return new Promise((resolve) => resolve(contacts))
+    async findAll(orderBy = 'ASC') {
+        const direction = orderBy.toUpperCase() === 'DESC' ? 'DESC' : 'ASC'
+        const rows = await database.query(`
+        SELECT users.* 
+        from users 
+        LEFT JOIN accounts ON accounts.id = users.account_id
+        ORDER BY name ${direction}
+        `)
+        return rows
     }
 
-    
-    findByEmail(email) {
-        return new Promise((resolve) => resolve(
-            contacts.find((contact) => contact.email === email),
-        ))
-    }
 
-    findById(id) {
-        return new Promise((resolve) => resolve(
-            contacts.find((contact) => contact.id === id),
-        ))
+    async findById(id) {
+       const [row] = await database.query(`
+       SELECT users.* 
+       FROM users 
+       LEFT JOIN accounts ON accounts.id = users.account_id
+       WHERE users.id = $1
+       WHERE id = $1
+       `,[id])
+       return row
     }
 
     delete(id) {
@@ -46,35 +56,33 @@ class ContactsRepository {
     
     async create({ 
        name, 
-       password
+       password,
+       account_id
     }) {
-         const [row] = await bd.query(`INSERT INTO users.usuarios(name, password)
-         VALUES ($1, $2)
-         RETURNING *
-         `, [name, password])
+        const [row] = await database.query(`
+        INSERT INTO users(name, password, account_id) 
+        VALUES($1, $2, $3)
+        RETURNING *
+      `,[name,password,account_id]);
 
-         return row
-         }
+        return row
+    }
+         
 
 
-    update(id,{
-        name, email, phone, category_id 
+    async update(id,{
+        name, 
+       password,
+       account_id
     }) {
-        return new Promise((resolve) => {
-            const updatedContact = {
-               id,
-               name,
-               email,
-               phone,
-               category_id
-            }
-            
-           contacts = contacts.map((contact) => (
-            contact.id === id ? updatedContact : contact
-           ))
-           
-           resolve(updatedContact)
-           })
+        const [row] = await database.query(`
+        UPDATE users
+        SET name = $1, password = $2, account_id = $3
+        WHERE id = $4
+        RETURNING *
+        `,[name, password, account_id, id])
+
+        return row
     }
 }
 

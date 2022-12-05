@@ -2,17 +2,28 @@
 const { Client } = require('pg')
 
 const client = new Client({
-    user: "api-ng",
+    user: "ngdb",
     host: "localhost",
-    database: "api-ng",
-    password: "123456",
-    port: 5433
+    database: "ngdb",
+    password: "ngdb",
+    port: 5432
 })
 
 client.connect()
 
 // função para verificar rows
-exports.query = async (query) => {
-    const { rows } = await client.query(query)
+exports.query = async (query, values) => {
+    const { rows } = await client.query(query, values)
     return rows
 }
+
+
+// funcao para verificar valores no banco
+// async function Query(query) {
+//     const { rows } = await client.query('SELECT * FROM users')
+
+//     return rows
+// }
+
+// Query('SELECT * FROM users').then(console.log)
+

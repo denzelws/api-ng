@@ -1,11 +1,12 @@
-import { Request, response, Response } from "express";
+import { Request, Response } from "express";
 
 const ContactsRepository = require('../repositories/ContactsRepository')
 
 class UsersController {
     // listar registros
     async index(req: Request, res: Response) {
-      const contacts = await ContactsRepository.findAll()
+      const { orderBy } = req.query 
+      const contacts = await ContactsRepository.findAll(orderBy)
 
       res.json(contacts)
     }
@@ -23,26 +24,19 @@ class UsersController {
     }
 
     async store(req,res) {
-     const {  name,
-      email,
-      phone,
-      category_id } = req.body
+     const {
+      name, 
+      password,
+      account_id } = req.body
 
       if(!name) {
         return res.status(400).json({ error: "Name is required" })
       }
      
-     const contactExists = await ContactsRepository.findByEmail(email)
-
-     if(contactExists) {
-      return res.status(400).json({ error: "This e-mail is already in use" })
-     }
-
      const contact = await ContactsRepository.create({
-      name,
-      email,
-      phone,
-      category_id
+      name, 
+      password,
+      account_id
      })
 
      res.json(contact)
@@ -53,7 +47,9 @@ class UsersController {
       const { id } = req.params
 
       const {
-        name, email, phone, category_id 
+        name, 
+       password,
+       account_id
       } = req.body
 
       const contactExists = await ContactsRepository.findById(id)
@@ -66,13 +62,15 @@ class UsersController {
         return res.status(400).json({ error: "Name is required "})
       }
 
-      const contactByEmail = await ContactsRepository.findByEmail(email)
-     if(contactByEmail && contactByEmail.id !== id) {
-      return res.status(400).json({ error: "This e-mail is already in use" })
-     }
+    //   const contactByEmail = await ContactsRepository.findByEmail(email)
+    //  if(contactByEmail && contactByEmail.id !== id) {
+    //   return res.status(400).json({ error: "This e-mail is already in use" })
+    //  }
      
      const contact = await ContactsRepository.update(id, {
-      name, email, phone, category_id 
+      name, 
+      password,
+      account_id
      })
       
      res.json(contact)
